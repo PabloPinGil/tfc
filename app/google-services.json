@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "581306053729",
+    "firebase_url": "https://appstopsmoke-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "appstopsmoke",
+    "storage_bucket": "appstopsmoke.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:581306053729:android:d94fd6d02260a73384e620",
+        "android_client_info": {
+          "package_name": "com.example.appstopsmoke"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2IxKssYSGeYdukSgBNpfA91nT92D_0CI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
