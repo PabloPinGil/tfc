@@ -14,6 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 
 import com.example.appstopsmoke.R;
 import com.example.appstopsmoke.data.datasource.FirebaseDataSource;
@@ -31,14 +34,15 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class CompareActivity extends AppCompatActivity {
     private CompareViewModel viewModel;
     private LineChart chart;
-    private TextView tvCurrentStats, tvOtherStats;
+    private TextView tvCurrentStats, tvOtherStats, tvYourUserId;
+    private Button btnCopyUserId;
     private ContactsAdapter contactsAdapter;
+    private SmokeRepository repository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,16 +50,24 @@ public class CompareActivity extends AppCompatActivity {
         setContentView(R.layout.activity_compare);
 
         FirebaseDataSource dataSource = new FirebaseDataSource();
-        SmokeRepository repository = new SmokeRepository(dataSource, getApplicationContext());
+        repository = new SmokeRepository(dataSource, getApplicationContext());
         ViewModelFactory factory = new ViewModelFactory(repository);
 
         viewModel = new ViewModelProvider(this, factory).get(CompareViewModel.class);
 
         EditText etUserId = findViewById(R.id.etUserId);
         Button btnCompare = findViewById(R.id.btnCompare);
+        tvYourUserId = findViewById(R.id.tvYourUserId);
+        btnCopyUserId = findViewById(R.id.btnCopyUserId);
         chart = findViewById(R.id.chart);
         tvCurrentStats = findViewById(R.id.tvCurrentStats);
         tvOtherStats = findViewById(R.id.tvOtherStats);
+
+        // Cargar y mostrar el ID del usuario actual
+        loadCurrentUserId();
+
+        // Configurar el botón de copiar ID
+        btnCopyUserId.setOnClickListener(v -> copyUserIdToClipboard());
 
         // configura el recyclerview de los contactos
         RecyclerView rvContacts = findViewById(R.id.rvContacts);
@@ -101,6 +113,31 @@ public class CompareActivity extends AppCompatActivity {
 
         // configura la gráfica
         setupChart();
+    }
+
+    // Cargar el ID del usuario actual
+    private void loadCurrentUserId() {
+        String currentUserId = repository.getCurrentUserId();
+        if (currentUserId != null) {
+            tvYourUserId.setText("Tu ID: " + currentUserId);
+        } else {
+            tvYourUserId.setText("Tu ID: No disponible");
+            btnCopyUserId.setEnabled(false);
+        }
+    }
+
+    // Copiar ID al portapapeles
+    private void copyUserIdToClipboard() {
+        String currentUserId = repository.getCurrentUserId();
+        if (currentUserId != null) {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("User ID", currentUserId);
+            clipboard.setPrimaryClip(clip);
+
+            Toast.makeText(this, "ID copiado al portapapeles", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Error: ID no disponible", Toast.LENGTH_SHORT).show();
+        }
     }
 
     // muestra la ventana de añadir contacto
