@@ -2,6 +2,9 @@ package com.example.appstopsmoke.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -18,11 +21,14 @@ import com.example.appstopsmoke.viewmodel.ViewModelFactory;
 
 public class MainActivity extends AppCompatActivity {
     private MainViewModel viewModel;
+    private Animation buttonScaleAnimation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // cargar animación del botón
+        buttonScaleAnimation = AnimationUtils.loadAnimation(this, R.anim.button_scale);
 
         FirebaseDataSource dataSource = new FirebaseDataSource();
         SmokeRepository repository = new SmokeRepository(dataSource);
@@ -31,7 +37,13 @@ public class MainActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this, factory).get(MainViewModel.class);
 
         ImageView btnSmoke = findViewById(R.id.btnSmoke);
-        btnSmoke.setOnClickListener(v -> viewModel.registerSmoke());
+        btnSmoke.setOnClickListener(v -> {
+            // aplica la animación
+            v.startAnimation(buttonScaleAnimation);
+
+            // registra el cigarro después de un pequeño retraso
+            new Handler().postDelayed(() -> viewModel.registerSmoke(), 100);
+        });
 
         TextView tvSmokeStatus = findViewById(R.id.tvSmokeStatus);
 
