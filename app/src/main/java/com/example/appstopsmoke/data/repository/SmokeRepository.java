@@ -1,7 +1,11 @@
 package com.example.appstopsmoke.data.repository;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import com.example.appstopsmoke.data.datasource.FirebaseDataSource;
 import com.example.appstopsmoke.data.model.Smoke;
+import com.example.appstopsmoke.viewmodel.CompareViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -10,15 +14,22 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class SmokeRepository {
     private final FirebaseDataSource dataSource;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final Context context;
+    private static final String PREFS_NAME = "SmokeTrackerPrefs";
+    private static final String CONTACT_IDS_KEY = "contact_ids";
+    private static final String CONTACT_NAMES_KEY_PREFIX = "contact_name_";
 
-    public SmokeRepository(FirebaseDataSource dataSource) {
+    public SmokeRepository(FirebaseDataSource dataSource, Context context) {
         this.dataSource = dataSource;
+        this.context = context;
     }
 
     public String getCurrentUserId() {
@@ -30,7 +41,7 @@ public class SmokeRepository {
         updateLastSmokeTimestamp(smoke.getUserId(), smoke.getTimestamp());
     }
 
-    // actualiza en los datos del usuario el timestamp del último cigarro fumado
+    // actualiza el timestamp del último cigarro registrado para este usuario
     private void updateLastSmokeTimestamp(String userId, long timestamp) {
         Map<String, Object> data = new HashMap<>();
         data.put("lastSmokeTimestamp", timestamp);
@@ -40,7 +51,7 @@ public class SmokeRepository {
                 .update(data);
     }
 
-    // obtiene los datos de los cigarros fumados del usuario
+    // obtiene todos los cigarros del usuario actual desde firestore
     public void getUserSmokes(String userId, OnResultListener<List<Smoke>> listener) {
         dataSource.getUserSmokes(userId).addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
@@ -56,7 +67,6 @@ public class SmokeRepository {
         });
     }
 
-    // obtiene la ultima fecha en la que se fumó
     public void getLastSmokeTimestamp(OnResultListener<String> listener) {
         String userId = getCurrentUserId();
         if (userId == null) {
@@ -64,6 +74,7 @@ public class SmokeRepository {
             return;
         }
 
+        // obtiene el timestamp del último cigarro registrado para este usuario
         db.collection("users")
                 .document(userId)
                 .get()
@@ -78,6 +89,7 @@ public class SmokeRepository {
                 .addOnFailureListener(e -> listener.onResult(null));
     }
 
+    // obtiene el número de cigarros de hoy
     public void getTodaySmokeCount(OnResultListener<Integer> listener) {
         String userId = getCurrentUserId();
         if (userId == null) {
@@ -93,7 +105,7 @@ public class SmokeRepository {
         calendar.set(Calendar.MILLISECOND, 0);
         long startOfDay = calendar.getTimeInMillis();
 
-        // obtiene la cantidad de cigarros fumados el día de hoy
+        // obtiene los cigarros de hoy para el usuario actual
         db.collection("users").document(userId)
                 .collection("smokes")
                 .whereGreaterThanOrEqualTo("timestamp", startOfDay)
@@ -102,6 +114,43 @@ public class SmokeRepository {
                     listener.onResult(querySnapshot.size());
                 })
                 .addOnFailureListener(e -> listener.onResult(0));
+    }
+
+    public Map<String, CompareViewModel.Contact> loadSavedContacts() {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        Map<String, CompareViewModel.Contact> contacts = new HashMap<>();
+
+        // recupera todos los IDs de tus contactos
+        Set<String> contactIds = prefs.getStringSet(CONTACT_IDS_KEY, new HashSet<>());
+
+        for (String id : contactIds) {
+            String name = prefs.getString(CONTACT_NAMES_KEY_PREFIX + id, null);
+
+            if (name != null) {
+                // crea un contacto solo con id y name
+                contacts.put(id, new CompareViewModel.Contact(id, name));
+            }
+        }
+
+        return contacts;
+    }
+
+    public void saveContactsToPreferences(Map<String, CompareViewModel.Contact> contacts) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        // guarda todos los IDs de los contactos
+        Set<String> contactIds = new HashSet<>(contacts.keySet());
+        editor.putStringSet(CONTACT_IDS_KEY, contactIds);
+
+        // guarda cada contacto individualmente (solo el nombre)
+        for (Map.Entry<String, CompareViewModel.Contact> entry : contacts.entrySet()) {
+            String id = entry.getKey();
+            CompareViewModel.Contact contact = entry.getValue();
+            editor.putString(CONTACT_NAMES_KEY_PREFIX + id, contact.name);
+        }
+
+        editor.apply();
     }
 
     public interface OnResultListener<T> {

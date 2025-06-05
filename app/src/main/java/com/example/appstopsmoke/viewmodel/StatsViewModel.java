@@ -20,6 +20,7 @@ public class StatsViewModel extends ViewModel {
         loadUserData();
     }
 
+    // actualiza el estado de carga y maneja los resultados o errores
     private void loadUserData() {
         isLoading.postValue(true);
         String userId = repository.getCurrentUserId();

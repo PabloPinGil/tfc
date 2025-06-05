@@ -18,6 +18,7 @@ import com.example.appstopsmoke.data.datasource.FirebaseDataSource;
 import com.example.appstopsmoke.data.repository.SmokeRepository;
 import com.example.appstopsmoke.viewmodel.MainViewModel;
 import com.example.appstopsmoke.viewmodel.ViewModelFactory;
+import com.example.appstopsmoke.testData.TestData;
 
 public class MainActivity extends AppCompatActivity {
     private MainViewModel viewModel;
@@ -27,11 +28,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // cargar animación del botón
+        TestData.insertTestData(this);
+
+        // carga la animación del botón
         buttonScaleAnimation = AnimationUtils.loadAnimation(this, R.anim.button_scale);
 
         FirebaseDataSource dataSource = new FirebaseDataSource();
-        SmokeRepository repository = new SmokeRepository(dataSource);
+        SmokeRepository repository = new SmokeRepository(dataSource, this);
         ViewModelFactory factory = new ViewModelFactory(repository);
 
         viewModel = new ViewModelProvider(this, factory).get(MainViewModel.class);
@@ -76,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Actualizar estado al volver a la actividad
+        // actualiza estado al volver a la actividad
         viewModel.loadSmokeStatus();
     }
 }
