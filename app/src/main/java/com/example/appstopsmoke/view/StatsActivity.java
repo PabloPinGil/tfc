@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 public class StatsActivity extends AppCompatActivity {
@@ -80,23 +79,51 @@ public class StatsActivity extends AppCompatActivity {
     }
 
     private void updateChart(List<Smoke> smokes) {
-        // agrupa cigarros por día
-        Map<String, Integer> smokesPerDay = new TreeMap<>(); // treemap para ordenar por fecha
-        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM", Locale.getDefault());
+        // Clase auxiliar para almacenar datos del día
+        class DayData {
+            int count;
+            long timestamp;
 
-        for (Smoke smoke : smokes) {
-            String date = sdf.format(new Date(smoke.getTimestamp()));
-            smokesPerDay.put(date, smokesPerDay.getOrDefault(date, 0) + 1);
+            DayData(int count, long timestamp) {
+                this.count = count;
+                this.timestamp = timestamp;
+            }
         }
 
-        // crea datos para la gráfica
+        // Agrupa cigarros por día usando formato yyyy-MM-dd como clave
+        Map<String, DayData> smokesPerDay = new HashMap<>();
+        SimpleDateFormat keyFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+        for (Smoke smoke : smokes) {
+            long timestamp = smoke.getTimestamp();
+            String dateKey = keyFormat.format(new Date(timestamp));
+
+            DayData existing = smokesPerDay.get(dateKey);
+            if (existing == null) {
+                smokesPerDay.put(dateKey, new DayData(1, timestamp));
+            } else {
+                smokesPerDay.put(dateKey, new DayData(existing.count + 1, existing.timestamp));
+            }
+        }
+
+        // Convierte a lista y ordena cronológicamente por timestamp
+        List<Map.Entry<String, DayData>> sortedEntries = new ArrayList<>(smokesPerDay.entrySet());
+        Collections.sort(sortedEntries, (entry1, entry2) ->
+                Long.compare(entry1.getValue().timestamp, entry2.getValue().timestamp));
+
+        // Crea datos para la gráfica
         List<Entry> entries = new ArrayList<>();
-        List<String> dates = new ArrayList<>(smokesPerDay.keySet());
+        List<String> displayLabels = new ArrayList<>();
+        SimpleDateFormat displayFormat = new SimpleDateFormat("dd MMM", Locale.getDefault());
 
         float maxValue = 0;
-        for (int i = 0; i < dates.size(); i++) {
-            float value = smokesPerDay.get(dates.get(i));
+        for (int i = 0; i < sortedEntries.size(); i++) {
+            DayData dayData = sortedEntries.get(i).getValue();
+            float value = dayData.count;
+
             entries.add(new Entry(i, value));
+            displayLabels.add(displayFormat.format(new Date(dayData.timestamp)));
+
             if (value > maxValue) maxValue = value;
         }
 
@@ -142,8 +169,8 @@ public class StatsActivity extends AppCompatActivity {
         xAxis.setTextColor(ContextCompat.getColor(this, R.color.chart_text_color));
         xAxis.setTextSize(10f);
         xAxis.setDrawGridLines(false);
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(dates));
-        xAxis.setLabelCount(dates.size());
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(displayLabels)); // Usa las etiquetas cortas
+        xAxis.setLabelCount(Math.min(displayLabels.size(), 7)); // Limita las etiquetas mostradas
         xAxis.setGranularity(1f);
 
         YAxis leftAxis = chart.getAxisLeft();
