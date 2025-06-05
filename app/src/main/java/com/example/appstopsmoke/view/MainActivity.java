@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        TestData.insertTestData(this);
+        // TestData.insertTestData(this);
 
         // carga la animación del botón
         buttonScaleAnimation = AnimationUtils.loadAnimation(this, R.anim.button_scale);
