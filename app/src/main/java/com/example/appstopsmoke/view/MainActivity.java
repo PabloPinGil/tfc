@@ -74,6 +74,9 @@ public class MainActivity extends AppCompatActivity {
         Button btnCompare = findViewById(R.id.btnCompare);
         btnCompare.setOnClickListener(v ->
                 startActivity(new Intent(this, CompareActivity.class)));
+
+        // carga el estado cuando se abre la app. antes solo se cargaba al cambiar de pantalla
+        viewModel.loadSmokeStatus();
     }
 
     @Override
