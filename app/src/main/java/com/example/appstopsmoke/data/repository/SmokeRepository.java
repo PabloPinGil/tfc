@@ -41,6 +41,7 @@ public class SmokeRepository {
         updateLastSmokeTimestamp(smoke.getUserId(), smoke.getTimestamp());
     }
 
+    // actualiza el timestamp del último cigarro registrado para este usuario
     private void updateLastSmokeTimestamp(String userId, long timestamp) {
         Map<String, Object> data = new HashMap<>();
         data.put("lastSmokeTimestamp", timestamp);
@@ -50,6 +51,7 @@ public class SmokeRepository {
                 .update(data);
     }
 
+    // obtiene todos los cigarros del usuario actual desde firestore
     public void getUserSmokes(String userId, OnResultListener<List<Smoke>> listener) {
         dataSource.getUserSmokes(userId).addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
@@ -72,6 +74,7 @@ public class SmokeRepository {
             return;
         }
 
+        // obtiene el timestamp del último cigarro registrado para este usuario
         db.collection("users")
                 .document(userId)
                 .get()
@@ -86,6 +89,7 @@ public class SmokeRepository {
                 .addOnFailureListener(e -> listener.onResult(null));
     }
 
+    // obtiene el número de cigarros de hoy
     public void getTodaySmokeCount(OnResultListener<Integer> listener) {
         String userId = getCurrentUserId();
         if (userId == null) {
@@ -93,6 +97,7 @@ public class SmokeRepository {
             return;
         }
 
+        // obtiene el inicio del día
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
@@ -100,6 +105,7 @@ public class SmokeRepository {
         calendar.set(Calendar.MILLISECOND, 0);
         long startOfDay = calendar.getTimeInMillis();
 
+        // obtiene los cigarros de hoy para el usuario actual
         db.collection("users").document(userId)
                 .collection("smokes")
                 .whereGreaterThanOrEqualTo("timestamp", startOfDay)
@@ -114,14 +120,14 @@ public class SmokeRepository {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         Map<String, CompareViewModel.Contact> contacts = new HashMap<>();
 
-        // Recuperar todos los IDs de contactos
+        // recupera todos los IDs de tus contactos
         Set<String> contactIds = prefs.getStringSet(CONTACT_IDS_KEY, new HashSet<>());
 
         for (String id : contactIds) {
             String name = prefs.getString(CONTACT_NAMES_KEY_PREFIX + id, null);
 
             if (name != null) {
-                // Crear contacto solo con id y name (sin email)
+                // crea un contacto solo con id y name
                 contacts.put(id, new CompareViewModel.Contact(id, name));
             }
         }
@@ -133,11 +139,11 @@ public class SmokeRepository {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
-        // Guardar todos los IDs de contactos
+        // guarda todos los IDs de los contactos
         Set<String> contactIds = new HashSet<>(contacts.keySet());
         editor.putStringSet(CONTACT_IDS_KEY, contactIds);
 
-        // Guardar cada contacto individualmente (solo name)
+        // guarda cada contacto individualmente (solo el nombre)
         for (Map.Entry<String, CompareViewModel.Contact> entry : contacts.entrySet()) {
             String id = entry.getKey();
             CompareViewModel.Contact contact = entry.getValue();

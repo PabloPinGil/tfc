@@ -38,13 +38,13 @@ public class CompareViewModel extends ViewModel {
         String currentUserId = repository.getCurrentUserId();
 
         if (currentUserId != null && otherUserId != null) {
-            // Cargar datos del usuario actual
+            // carga los datos del usuario actual
             repository.getUserSmokes(currentUserId, currentSmokes -> {
                 if (currentSmokes != null && !currentSmokes.isEmpty()) {
                     currentUserData.postValue(currentSmokes);
                 }
 
-                // Cargar datos del otro usuario
+                // carga los datos del otro usuario
                 repository.getUserSmokes(otherUserId, otherSmokes -> {
                     isLoading.postValue(false);
                     if (otherSmokes != null && !otherSmokes.isEmpty()) {
@@ -60,6 +60,7 @@ public class CompareViewModel extends ViewModel {
         }
     }
 
+    // guarda el contacto en la memoria
     public void addContact(String userId, String contactName) {
         Map<String, Contact> contacts = savedContacts.getValue();
         if (contacts == null) {
@@ -71,6 +72,7 @@ public class CompareViewModel extends ViewModel {
         saveContactsToPreferences(contacts);
     }
 
+    // elimina el contacto de la memoria
     public void removeContact(String userId) {
         Map<String, Contact> contacts = savedContacts.getValue();
         if (contacts != null && contacts.containsKey(userId)) {
@@ -98,18 +100,18 @@ public class CompareViewModel extends ViewModel {
             return null;
         }
 
-        // Agrupar datos por día para ambos usuarios
+        // agrupa los datos por día para ambos usuarios
         Map<String, DayData> currentSmokesPerDay = groupSmokesByDay(currentSmokes);
         Map<String, DayData> otherSmokesPerDay = groupSmokesByDay(otherSmokes);
 
-        // Combinar todos los días únicos y ordenar por fecha real
+        // combina todos los días únicos y ordena por fecha
         Set<String> allDatesSet = new HashSet<>();
         allDatesSet.addAll(currentSmokesPerDay.keySet());
         allDatesSet.addAll(otherSmokesPerDay.keySet());
 
         List<String> allDates = new ArrayList<>(allDatesSet);
 
-        // Ordenar por fecha cronológicamente usando el timestamp
+        // ordena por fecha cronológicamente usando el timestamp
         Collections.sort(allDates, (date1, date2) -> {
             DayData day1 = currentSmokesPerDay.containsKey(date1) ?
                     currentSmokesPerDay.get(date1) : otherSmokesPerDay.get(date1);
@@ -118,7 +120,7 @@ public class CompareViewModel extends ViewModel {
             return Long.compare(day1.timestamp, day2.timestamp);
         });
 
-        // Crear conjuntos de datos para el gráfico
+        // crea conjuntos de datos para el gráfico
         List<ChartEntry> currentEntries = new ArrayList<>();
         List<ChartEntry> otherEntries = new ArrayList<>();
         List<String> displayLabels = new ArrayList<>();
@@ -126,17 +128,17 @@ public class CompareViewModel extends ViewModel {
         for (int i = 0; i < allDates.size(); i++) {
             String dateKey = allDates.get(i);
 
-            // Obtener los datos del día para ambos usuarios
+            // obtiene los datos del día para ambos usuarios
             DayData currentDay = currentSmokesPerDay.get(dateKey);
             DayData otherDay = otherSmokesPerDay.get(dateKey);
 
             int currentCount = currentDay != null ? currentDay.count : 0;
             int otherCount = otherDay != null ? otherDay.count : 0;
 
-            // Usar el timestamp del día que tenga datos, o el primero disponible
+            // usa el timestamp del día que tenga datos, o el primero disponible
             long dayTimestamp = currentDay != null ? currentDay.timestamp : otherDay.timestamp;
 
-            // Crear label corto para visualización
+            // crea un label para mostrar los datos
             String displayLabel = formatDateForDisplay(dayTimestamp);
 
             currentEntries.add(new ChartEntry(i, currentCount, "Tú"));
@@ -150,10 +152,10 @@ public class CompareViewModel extends ViewModel {
     public String getUserStats(List<Smoke> smokes, String userName) {
         if (smokes == null || smokes.isEmpty()) return "";
 
-        // Calcular estadísticas
+        // calcula las estadísticas
         int total = smokes.size();
 
-        // Ordenar por timestamp
+        // ordena por timestamp
         Collections.sort(smokes, Comparator.comparingLong(Smoke::getTimestamp));
 
         long first = smokes.get(0).getTimestamp();
@@ -167,6 +169,7 @@ public class CompareViewModel extends ViewModel {
                 userName, total, average);
     }
 
+    // agrupa los datos por día
     private Map<String, DayData> groupSmokesByDay(List<Smoke> smokes) {
         Map<String, DayData> smokesPerDay = new HashMap<>();
         SimpleDateFormat keyFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -177,10 +180,10 @@ public class CompareViewModel extends ViewModel {
 
             DayData existing = smokesPerDay.get(dateKey);
             if (existing == null) {
-                // Crear nuevo DayData con el timestamp del primer cigarro de ese día
+                // crea un nuevo DayData con el timestamp del primer cigarro de ese día
                 smokesPerDay.put(dateKey, new DayData(1, timestamp));
             } else {
-                // Incrementar contador, mantener el timestamp original del día
+                // incrementa contador, mantiene el timestamp original del día
                 smokesPerDay.put(dateKey, new DayData(existing.count + 1, existing.timestamp));
             }
         }
@@ -213,7 +216,7 @@ public class CompareViewModel extends ViewModel {
         return isLoading;
     }
 
-    // Clases de datos internas
+    // clases para almacenar los datos del gráfico
     public static class ChartData {
         public final List<ChartEntry> currentUserEntries;
         public final List<ChartEntry> otherUserEntries;
@@ -250,7 +253,7 @@ public class CompareViewModel extends ViewModel {
         }
     }
 
-    // Nueva clase para almacenar datos del día con timestamp
+    // clase para almacenar datos del día con timestamp
     private static class DayData {
         public final int count;
         public final long timestamp;

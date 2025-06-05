@@ -22,6 +22,7 @@ public class MainViewModel extends ViewModel {
         loadSmokeStatus();
     }
 
+    // resgistra en firebase un nuevo cigarro fumado
     public void registerSmoke() {
         String userId = repository.getCurrentUserId();
         if (userId != null) {
@@ -42,6 +43,7 @@ public class MainViewModel extends ViewModel {
         }
     }
 
+    // decide si mostrar "Llevas X cigarros fumados hoy" o "Llevas X días sin fumar"
     public void loadSmokeStatus() {
         repository.getLastSmokeTimestamp(result -> {
             if (result != null && !result.isEmpty()) {

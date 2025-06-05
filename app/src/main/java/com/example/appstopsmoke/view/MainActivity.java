@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         TestData.insertTestData(this);
 
-        // cargar animación del botón
+        // carga la animación del botón
         buttonScaleAnimation = AnimationUtils.loadAnimation(this, R.anim.button_scale);
 
         FirebaseDataSource dataSource = new FirebaseDataSource();
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Actualizar estado al volver a la actividad
+        // actualiza estado al volver a la actividad
         viewModel.loadSmokeStatus();
     }
 }

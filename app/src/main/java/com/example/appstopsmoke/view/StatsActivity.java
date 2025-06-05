@@ -79,7 +79,7 @@ public class StatsActivity extends AppCompatActivity {
     }
 
     private void updateChart(List<Smoke> smokes) {
-        // Clase auxiliar para almacenar datos del día
+        // clase auxiliar para almacenar datos del día
         class DayData {
             int count;
             long timestamp;
@@ -91,6 +91,7 @@ public class StatsActivity extends AppCompatActivity {
         }
 
         // Agrupa cigarros por día usando formato yyyy-MM-dd como clave
+        // antes estaba usando dd-MMM, lo que causaba que los meses se ordenasen mal
         Map<String, DayData> smokesPerDay = new HashMap<>();
         SimpleDateFormat keyFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
@@ -169,8 +170,8 @@ public class StatsActivity extends AppCompatActivity {
         xAxis.setTextColor(ContextCompat.getColor(this, R.color.chart_text_color));
         xAxis.setTextSize(10f);
         xAxis.setDrawGridLines(false);
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(displayLabels)); // Usa las etiquetas cortas
-        xAxis.setLabelCount(Math.min(displayLabels.size(), 7)); // Limita las etiquetas mostradas
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(displayLabels)); // usa las etiquetas cortas
+        xAxis.setLabelCount(Math.min(displayLabels.size(), 7)); // limita los días mostrados a 7
         xAxis.setGranularity(1f);
 
         YAxis leftAxis = chart.getAxisLeft();

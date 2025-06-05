@@ -57,7 +57,7 @@ public class CompareActivity extends AppCompatActivity {
         tvCurrentStats = findViewById(R.id.tvCurrentStats);
         tvOtherStats = findViewById(R.id.tvOtherStats);
 
-        // Configurar RecyclerView para contactos
+        // configura el recyclerview de los contactos
         RecyclerView rvContacts = findViewById(R.id.rvContacts);
         rvContacts.setLayoutManager(new LinearLayoutManager(this));
         contactsAdapter = new ContactsAdapter();
@@ -73,7 +73,6 @@ public class CompareActivity extends AppCompatActivity {
             }
         });
 
-        // Observadores
         viewModel.getCurrentUserData().observe(this, smokes -> {
             if (smokes != null && !smokes.isEmpty()) {
                 updateStats();
@@ -94,24 +93,17 @@ public class CompareActivity extends AppCompatActivity {
             contactsAdapter.setContacts(contacts);
         });
 
-        viewModel.getIsLoading().observe(this, isLoading -> {
-            if (isLoading != null && isLoading) {
-                // Mostrar progress bar
-            } else {
-                // Ocultar progress bar
-            }
-        });
-
         viewModel.getLoadingError().observe(this, error -> {
             if (error != null) {
                 Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
             }
         });
 
-        // Configurar gráfica
+        // configura la gráfica
         setupChart();
     }
 
+    // muestra la ventana de añadir contacto
     private void showAddContactDialog(String userId) {
         new AlertDialog.Builder(this)
                 .setTitle("Guardar contacto")
@@ -123,6 +115,7 @@ public class CompareActivity extends AppCompatActivity {
                 .show();
     }
 
+    // muestra la ventana de añadir nombre de contacto
     private void showNameInputDialog(String userId) {
         final EditText input = new EditText(this);
         input.setHint("Nombre del contacto");
@@ -142,6 +135,7 @@ public class CompareActivity extends AppCompatActivity {
                 .show();
     }
 
+    // actualiza las estadística para mostrar en la gráfica
     private void updateStats() {
         String currentStats = viewModel.getUserStats(
                 viewModel.getCurrentUserData().getValue(),
@@ -157,6 +151,7 @@ public class CompareActivity extends AppCompatActivity {
         if (!otherStats.isEmpty()) tvOtherStats.setText(otherStats);
     }
 
+    // configura la gráfica
     private void setupChart() {
         // Configuración básica del gráfico
         chart.getDescription().setEnabled(false);
@@ -190,6 +185,7 @@ public class CompareActivity extends AppCompatActivity {
         chart.getAxisRight().setEnabled(false);
     }
 
+    // actualiza la gráfica
     private void updateChart() {
         CompareViewModel.ChartData chartData = viewModel.prepareChartData();
         if (chartData == null) return;
@@ -235,7 +231,7 @@ public class CompareActivity extends AppCompatActivity {
         LineData lineData = new LineData(currentDataSet, otherDataSet);
         chart.setData(lineData);
 
-        // Configurar etiquetas del eje X
+        // configura las etiquetas del eje x
         XAxis xAxis = chart.getXAxis();
         xAxis.setValueFormatter(new ValueFormatter() {
             @Override
@@ -251,7 +247,7 @@ public class CompareActivity extends AppCompatActivity {
         chart.invalidate(); // refrescar
     }
 
-    // Adapter para la lista de contactos
+    // adapter para la lista de contactos
     private class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHolder> {
         private List<CompareViewModel.Contact> contacts = new ArrayList<>();
 
@@ -275,10 +271,11 @@ public class CompareActivity extends AppCompatActivity {
             holder.textView.setText(contact.name);
 
             holder.itemView.setOnClickListener(v -> {
-                // Cargar datos del contacto seleccionado
+                // carga los datos del contacto seleccionado
                 viewModel.loadComparisonData(contact.userId);
             });
 
+            // permite eliminar un contacto al mantener pulsado
             holder.itemView.setOnLongClickListener(v -> {
                 new AlertDialog.Builder(CompareActivity.this)
                         .setTitle("Eliminar contacto")

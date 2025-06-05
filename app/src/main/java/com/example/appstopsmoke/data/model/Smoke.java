@@ -5,7 +5,7 @@ public class Smoke {
     private long timestamp;
     private String userId;
 
-    // Constructor vacío necesario para Firestore
+    // constructor vacío necesario para Firestore
     public Smoke() {}
 
     public Smoke(String id, long timestamp, String userId) {
@@ -14,7 +14,7 @@ public class Smoke {
         this.userId = userId;
     }
 
-    // Getters y setters
+    // getters y setters
     public String getId() { return id; }
     public long getTimestamp() { return timestamp; }
     public String getUserId() { return userId; }
