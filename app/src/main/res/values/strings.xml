@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">appStopSmoke</string>
+    <string name="app_name">StopSmoke</string>
     <string name="cigarette_button_desc">Botón para registrar cigarro fumado</string>
 </resources>
