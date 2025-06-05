@@ -3,6 +3,8 @@ package com.example.appstopsmoke.view;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,10 +30,19 @@ public class MainActivity extends AppCompatActivity {
 
         viewModel = new ViewModelProvider(this, factory).get(MainViewModel.class);
 
-        Button btnSmoke = findViewById(R.id.btnSmoke);
+        ImageView btnSmoke = findViewById(R.id.btnSmoke);
         btnSmoke.setOnClickListener(v -> viewModel.registerSmoke());
 
-        // observar resultados
+        TextView tvSmokeStatus = findViewById(R.id.tvSmokeStatus);
+
+        // muestra el estado actual (cigarros fumados/dias sin fumar)
+        viewModel.getSmokeStatus().observe(this, status -> {
+            if (status != null) {
+                tvSmokeStatus.setText(status);
+            }
+        });
+
+        // observar resultados del registro
         viewModel.getSmokeRegistered().observe(this, success -> {
             if (success != null) {
                 Toast.makeText(this,
@@ -48,5 +59,12 @@ public class MainActivity extends AppCompatActivity {
         Button btnCompare = findViewById(R.id.btnCompare);
         btnCompare.setOnClickListener(v ->
                 startActivity(new Intent(this, CompareActivity.class)));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Actualizar estado al volver a la actividad
+        viewModel.loadSmokeStatus();
     }
 }
