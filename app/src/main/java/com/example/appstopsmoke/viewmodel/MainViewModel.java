@@ -19,7 +19,8 @@ public class MainViewModel extends ViewModel {
 
     public MainViewModel(SmokeRepository repository) {
         this.repository = repository;
-        loadSmokeStatus();
+        // quité de aquí el loadStatus porque se ejecutaba antes de que firebase tuviese listos los
+        // datos, creando el error de mostrarlo incorrectamente al abrir la app
     }
 
     // resgistra en firebase un nuevo cigarro fumado
