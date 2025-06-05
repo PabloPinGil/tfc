@@ -12,26 +12,44 @@ import java.util.List;
 public class StatsViewModel extends ViewModel {
     private final SmokeRepository repository;
     private final MutableLiveData<List<Smoke>> smokesData = new MutableLiveData<>();
+    private final MutableLiveData<String> loadingError = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
 
-
-    // constructor que inicializa el viewmodel con el repositorio y carga los datos del usuario
     public StatsViewModel(SmokeRepository repository) {
         this.repository = repository;
         loadUserData();
     }
 
-
-    // carga los datos del usuario actual desde el repositorio
     private void loadUserData() {
+        isLoading.postValue(true);
         String userId = repository.getCurrentUserId();
         if (userId != null) {
-            repository.getUserSmokes(userId);
+            repository.getUserSmokes(userId, new SmokeRepository.OnResultListener<List<Smoke>>() {
+                @Override
+                public void onResult(List<Smoke> result) {
+                    isLoading.postValue(false);
+                    if (result != null && !result.isEmpty()) {
+                        smokesData.postValue(result);
+                    } else {
+                        loadingError.postValue("No hay datos disponibles");
+                    }
+                }
+            });
+        } else {
+            loadingError.postValue("Usuario no autenticado");
+            isLoading.postValue(false);
         }
     }
 
-
-    // livedata con los datos del usuario
     public LiveData<List<Smoke>> getSmokesData() {
-        return repository.getUserSmokes(repository.getCurrentUserId());
+        return smokesData;
+    }
+
+    public LiveData<String> getLoadingError() {
+        return loadingError;
+    }
+
+    public LiveData<Boolean> getIsLoading() {
+        return isLoading;
     }
 }

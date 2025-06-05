@@ -12,19 +12,30 @@ import java.util.List;
 public class CompareViewModel extends ViewModel {
     private final SmokeRepository repository;
     private final MutableLiveData<List<Smoke>> otherUserData = new MutableLiveData<>();
+    private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
 
-    // constructor que inyecta la dependencia del repositorio
     public CompareViewModel(SmokeRepository repository) {
         this.repository = repository;
     }
 
-    // carga los datos de otro usuario y los almacena en livedata
     public void loadOtherUserData(String userId) {
-        repository.getUserSmokes(userId).observeForever(otherUserData::postValue);
+        repository.getUserSmokes(userId, new SmokeRepository.OnResultListener<List<Smoke>>() {
+            @Override
+            public void onResult(List<Smoke> result) {
+                if (result != null && !result.isEmpty()) {
+                    otherUserData.postValue(result);
+                } else {
+                    errorMessage.postValue("No se encontraron datos");
+                }
+            }
+        });
     }
 
-    // devuelve los datos del otro usuario
     public LiveData<List<Smoke>> getOtherUserData() {
         return otherUserData;
+    }
+
+    public LiveData<String> getErrorMessage() {
+        return errorMessage;
     }
 }
