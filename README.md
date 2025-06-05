@@ -25,7 +25,7 @@ AppStopSmoke es una aplicación móvil diseñada para ayudarte a reducir y final
 ### Requisitos previos
 
 - Android Studio
-- Dispositivo Android o emulador (API 21 o superior)
+- Dispositivo Android o emulador
 
 ### Pasos para ejecutar
 
