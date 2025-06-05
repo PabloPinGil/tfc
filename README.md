@@ -55,13 +55,13 @@ AppStopSmoke es una aplicación móvil diseñada para ayudarte a reducir y final
 
 ## Arquitectura
 
-AppStopSmoke sigue una arquitectura MVVM limpia y modular:
+StopSmoke sigue una arquitectura MVVM limpia y modular:
 
 **Principios clave**:
-- Separación clara de responsabilidades
+- Separación de responsabilidades
 - Uso de LiveData para comunicación reactiva
 - Repositorios como únicas fuentes de datos
 - Inyección de dependencias manual para mejor testabilidad
 
 
-**Deja de fumar hoy mismo** - Cada cigarro que no fumas es una victoria. ¡AppStopSmoke te ayuda a ganar la batalla contra el tabaco!
+**Deja de fumar hoy mismo** - Cada cigarro que no fumas es una victoria. ¡StopSmoke te ayuda a ganar la batalla contra el tabaco!
