@@ -51,7 +51,7 @@ public class StatsActivity extends AppCompatActivity {
         tvAverage = findViewById(R.id.tvAverage);
 
         FirebaseDataSource dataSource = new FirebaseDataSource();
-        SmokeRepository repository = new SmokeRepository(dataSource);
+        SmokeRepository repository = new SmokeRepository(dataSource, this);
         ViewModelFactory factory = new ViewModelFactory(repository);
 
         viewModel = new ViewModelProvider(this, factory).get(StatsViewModel.class);
